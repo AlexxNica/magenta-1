@@ -1,10 +1,13 @@
 // MDI definitions for the platform bus driver
 
 // Top level nodes
-list platform-bus                              3
+list platform-bus           3
 
-list platform-bus.driver                       10
-string platform-bus.driver.name                11
-uint32 platform-bus.driver.vid                 12
-uint32 platform-bus.driver.pid                 13
-uint32 platform-bus.driver.did                 14
+// TODO(voydanoff) I would like to specify that device is a child of platform-bus
+// but there isn't a way to do this while still allowing nesting of devices
+list device                 10
+string device.name          11
+uint32 device.vid           12
+uint32 device.pid           13
+uint32 device.did           14
+list device.children        15

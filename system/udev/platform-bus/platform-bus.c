@@ -50,10 +50,10 @@ static mx_protocol_device_t platform_bus_proto = {
 
 static void platform_bus_publish_devices(mdi_node_ref_t* bus_node, mx_device_t* parent,
                                          mx_driver_t* driver) {
-    mdi_node_ref_t  driver_node;
-    mdi_each_child(bus_node, &driver_node) {
-        if (mdi_id(&driver_node) != MDI_PLATFORM_BUS_DRIVER) {
-            printf("unexpected node %d in platform_bus_publish_devices\n", mdi_id(&driver_node));
+    mdi_node_ref_t  device_node;
+    mdi_each_child(bus_node, &device_node) {
+        if (mdi_id(&device_node) != MDI_DEVICE) {
+            printf("unexpected node %d in platform_bus_publish_devices\n", mdi_id(&device_node));
             continue;
         }
         uint32_t vid = 0;
@@ -61,18 +61,18 @@ static void platform_bus_publish_devices(mdi_node_ref_t* bus_node, mx_device_t* 
         uint32_t did = 0;
         const char* name = NULL;
         mdi_node_ref_t  node;
-        mdi_each_child(&driver_node, &node) {
+        mdi_each_child(&device_node, &node) {
             switch (mdi_id(&node)) {
-                case MDI_PLATFORM_BUS_DRIVER_NAME:
-                    name = mdi_node_string(&node);
-                    break;
-                case MDI_PLATFORM_BUS_DRIVER_VID:
+            case MDI_DEVICE_NAME:
+                name = mdi_node_string(&node);
+                break;
+            case MDI_DEVICE_VID:
                 mdi_node_uint32(&node, &vid);
                 break;
-            case MDI_PLATFORM_BUS_DRIVER_PID:
+            case MDI_DEVICE_PID:
                 mdi_node_uint32(&node, &pid);
                 break;
-            case MDI_PLATFORM_BUS_DRIVER_DID:
+            case MDI_DEVICE_DID:
                 mdi_node_uint32(&node, &did);
                 break;
             default:
