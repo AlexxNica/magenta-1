@@ -24,5 +24,37 @@ platform-bus = {
         vid = 0xBC
         pid = 1
         did = 1
+        children = {
+            device = {
+                name = "bcm-emmc"
+                vid = 0xBC
+                pid = 1
+                did = 2
+            }
+            device = {
+                name = "bcm-i2c"
+                vid = 0xBC
+                pid = 1
+                did = 3
+            }
+            device = {
+                name = "bcm-pcm"
+                vid = 0xBC
+                pid = 1
+                did = 4
+            }
+            device = {
+                name = "bcm-usb"
+                vid = 0xBC
+                pid = 1
+                did = 5
+            }
+            device = {
+                name = "bcm-display"
+                vid = 0xBC
+                pid = 1
+                did = 6
+            }
+        }
     }
 }

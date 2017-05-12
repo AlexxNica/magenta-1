@@ -324,111 +324,13 @@ static mx_protocol_device_t bus_device_proto = {
     .get_protocol = bus_device_get_protocol,
 };
 
+/* do we need this? */
 static mx_device_prop_t mailbox_props[] = {
     {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
     {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_MAILBOX},
 };
 
-static mx_device_prop_t emmc_props[] = {
-    {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
-    {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_EMMC},
-};
-
-static mx_device_prop_t i2c_props[] = {
-    {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
-    {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_I2C},
-};
-
-static mx_device_prop_t pcm_props[] = {
-    {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
-    {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_PCM},
-};
-
-static mx_device_prop_t usb_props[] = {
-    {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
-    {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_USB},
-};
-
-static mx_device_prop_t display_props[] = {
-    {BIND_SOC_VID, 0, SOC_VID_BROADCOMM},
-    {BIND_SOC_DID, 0, SOC_DID_BROADCOMM_DISPLAY},
-};
-
 // create child devices for our other drivers to bind to.
-// soon this will be replaced by creating devices from MDI.
-static void mailbox_publish_children(mx_driver_t* driver, mx_device_t* parent) {
-    mx_device_t* mxdev;
-
-    device_add_args_t sdmmc_args = {
-        .version = DEVICE_ADD_ARGS_VERSION,
-        .name = "bcm-sdmmc",
-        .driver = driver,
-        .ops = &bus_device_proto,
-        .proto_id = MX_PROTOCOL_SOC,
-        .props = emmc_props,
-        .prop_count = countof(emmc_props),
-    };
-
-    if (device_add(parent, &sdmmc_args, &mxdev) != NO_ERROR) {
-        printf("mailbox_publish_children failed to add bcm-sdmmc device\n");
-    }
-
-    device_add_args_t i2c_args = {
-        .version = DEVICE_ADD_ARGS_VERSION,
-        .name = "bcm-i2c",
-        .driver = driver,
-        .ops = &bus_device_proto,
-        .proto_id = MX_PROTOCOL_SOC,
-        .props = i2c_props,
-        .prop_count = countof(i2c_props),
-    };
-
-    if (device_add(parent, &i2c_args, &mxdev) != NO_ERROR) {
-        printf("mailbox_publish_children failed to add bcm-i2c device\n");
-    }
-
-    device_add_args_t pcm_args = {
-        .version = DEVICE_ADD_ARGS_VERSION,
-        .name = "bcm-pcm",
-        .driver = driver,
-        .ops = &bus_device_proto,
-        .proto_id = MX_PROTOCOL_SOC,
-        .props = pcm_props,
-        .prop_count = countof(pcm_props),
-    };
-
-    if (device_add(parent, &pcm_args, &mxdev) != NO_ERROR) {
-        printf("mailbox_publish_children failed to add bcm-pcm device\n");
-    }
-
-    device_add_args_t usb_args = {
-        .version = DEVICE_ADD_ARGS_VERSION,
-        .name = "bcm-usb",
-        .driver = driver,
-        .ops = &bus_device_proto,
-        .proto_id = MX_PROTOCOL_SOC,
-        .props = usb_props,
-        .prop_count = countof(usb_props),
-    };
-
-    if (device_add(parent, &usb_args, &mxdev) != NO_ERROR) {
-        printf("mailbox_publish_children failed to add bcm-usb device\n");
-    }
-
-    device_add_args_t display_args = {
-        .version = DEVICE_ADD_ARGS_VERSION,
-        .name = "bcm-display",
-        .driver = driver,
-        .ops = &bus_device_proto,
-        .proto_id = MX_PROTOCOL_SOC,
-        .props = display_props,
-        .prop_count = countof(display_props),
-    };
-
-    if (device_add(parent, &display_args, &mxdev) != NO_ERROR) {
-        printf("mailbox_publish_children failed to add bcm-display device\n");
-    }
-}
 
 static mx_status_t mailbox_bind(mx_driver_t* driver, mx_device_t* parent, void** cookie) {
     uintptr_t page_base;
@@ -465,8 +367,6 @@ static mx_status_t mailbox_bind(mx_driver_t* driver, mx_device_t* parent, void**
     bcm_vc_poweron(bcm_dev_sd);
     bcm_vc_poweron(bcm_dev_usb);
     bcm_vc_poweron(bcm_dev_i2c1);
-
-    mailbox_publish_children(driver, rpc_mxdev);
 
     return NO_ERROR;
 }

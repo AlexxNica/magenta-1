@@ -48,10 +48,10 @@ static mx_protocol_device_t platform_bus_proto = {
     .release = platform_bus_release,
 };
 
-static void platform_bus_publish_devices(mdi_node_ref_t* bus_node, mx_device_t* parent,
+static void platform_bus_publish_devices(mdi_node_ref_t* node, mx_device_t* parent,
                                          mx_driver_t* driver) {
     mdi_node_ref_t  device_node;
-    mdi_each_child(bus_node, &device_node) {
+    mdi_each_child(node, &device_node) {
         if (mdi_id(&device_node) != MDI_DEVICE) {
             printf("unexpected node %d in platform_bus_publish_devices\n", mdi_id(&device_node));
             continue;
@@ -119,6 +119,11 @@ static void platform_bus_publish_devices(mdi_node_ref_t* bus_node, mx_device_t* 
         } else {
             printf("platform-bus added device %s\n", name);
         }
+    }
+
+    mdi_node_ref_t children;
+    if (mdi_find_node(node, MDI_DEVICE_CHILDREN, &children) == NO_ERROR) {
+        platform_bus_publish_devices(&children, parent, driver);
     }
 }
 
