@@ -865,7 +865,7 @@ static mx_status_t dh_bind_driver(device_t* dev, const char* libname) {
 }
 
 static bool is_platform_bus_driver(driver_t* drv) {
-    return !strcmp(drv->libname, "driver/platform-bus.so");
+    return !strcmp(drv->libname, "/boot/lib/driver/platform-bus.so");
 }
 
 
