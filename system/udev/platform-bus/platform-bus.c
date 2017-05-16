@@ -113,17 +113,20 @@ static void platform_bus_publish_devices(mdi_node_ref_t* node, mx_device_t* pare
             .prop_count = countof(dev->props),
         };
 
+printf("device_add %s to %s\n", args.name, device_get_name(parent));
         mx_status_t status = device_add(parent, &args, &dev->mxdev);
         if (status != NO_ERROR) {
             printf("platform-bus failed to create device for %u:%u:%u\n", vid, pid, did);
-        } else {
-            printf("platform-bus added device %s\n", name);
+            return;
         }
-    }
 
-    mdi_node_ref_t children;
-    if (mdi_find_node(node, MDI_DEVICE_CHILDREN, &children) == NO_ERROR) {
-        platform_bus_publish_devices(&children, parent, driver);
+        printf("platform-bus added device %s\n", name);
+
+        mdi_node_ref_t children;
+        if (mdi_find_node(&device_node, MDI_DEVICE_CHILDREN, &children) == NO_ERROR) {
+printf("recurse on children\n");
+            platform_bus_publish_devices(&children, dev->mxdev, driver);
+        }
     }
 }
 

@@ -549,21 +549,27 @@ static mx_status_t lan9514_reset(lan9514_t* eth) {
     // if we are on rpi, then try to find BCM bus device to fetch MAC address
     // TODO(voydanoff) come up with a better way of accessing the bus protocol
     mx_device_t* busdev = eth->usb_device;
+printf("before loop\n");
     bcm_bus_protocol_t* bus_proto = NULL;
     while (busdev && device_op_get_protocol(busdev, MX_PROTOCOL_BCM_BUS, (void**)&bus_proto)
            != NO_ERROR) {
+printf("get parent of %s\n", device_get_name(busdev));
         busdev = device_get_parent(busdev);
     }
+printf("busdev %p bus_proto %p\n", busdev, bus_proto);
     if (busdev && bus_proto) {
+printf("aaaa busdev %s bus_proto %p\n", device_get_name(busdev), bus_proto);
         uint8_t temp_mac[6];
         if (bus_proto->get_macid(busdev, temp_mac) == NO_ERROR) {
             uint32_t macword = (temp_mac[5] << 8) + temp_mac[4];
+ printf("baa\n");
             if (lan9514_write_register(eth, LAN9514_ADDR_HI_REG, macword) < 0)
                 goto fail;
             macword =   (temp_mac[3] << 24) +
                         (temp_mac[2] << 16) +
                         (temp_mac[1] << 8 ) +
                          temp_mac[0];
+ printf("boo\n");
             if (lan9514_write_register(eth, LAN9514_ADDR_LO_REG, macword) < 0)
                 goto fail;
         }

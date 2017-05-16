@@ -274,9 +274,26 @@ static mx_status_t mailbox_device_ioctl(void* ctx, uint32_t op,
     }
 }
 
-static mx_protocol_device_t mailbox_device_proto = {
+static bcm_bus_protocol_t bcm_bus_protocol;
+static mx_protocol_device_t mailbox_device_protocol;
+
+mx_status_t bus_device_get_protocol(void* ctx, uint32_t proto_id, void** protocol) {
+printf("mailbox get protocol %x\n", proto_id);
+    if (proto_id == MX_PROTOCOL_BCM_BUS) {
+        *protocol = &bcm_bus_protocol;
+        return NO_ERROR;
+    }
+    if (proto_id == MX_PROTOCOL_DEVICE) {
+        *protocol = &mailbox_device_protocol;
+        return NO_ERROR;
+    }
+    return ERR_NOT_SUPPORTED;
+}
+
+static mx_protocol_device_t mailbox_device_protocol = {
     .version = DEVICE_OPS_VERSION,
     .ioctl = mailbox_device_ioctl,
+    .get_protocol = bus_device_get_protocol,
 };
 
 static mx_status_t bcm_bus_get_macid(mx_device_t* device, uint8_t* out_mac) {
@@ -303,25 +320,6 @@ static bcm_bus_protocol_t bcm_bus_protocol = {
     .get_macid = bcm_bus_get_macid,
     .get_clock_rate = bcm_bus_get_clock_rate,
     .set_framebuffer = bcm_bus_set_framebuffer,
-};
-
-static mx_protocol_device_t bus_device_proto;
-
-mx_status_t bus_device_get_protocol(void* ctx, uint32_t proto_id, void** protocol) {
-    if (proto_id == MX_PROTOCOL_BCM_BUS) {
-        *protocol = &bcm_bus_protocol;
-        return NO_ERROR;
-    }
-    if (proto_id == MX_PROTOCOL_DEVICE) {
-        *protocol = &bus_device_proto;
-        return NO_ERROR;
-    }
-    return ERR_NOT_SUPPORTED;
-}
-
-static mx_protocol_device_t bus_device_proto = {
-    .version = DEVICE_OPS_VERSION,
-    .get_protocol = bus_device_get_protocol,
 };
 
 /* do we need this? */
@@ -352,9 +350,7 @@ static mx_status_t mailbox_bind(mx_driver_t* driver, mx_device_t* parent, void**
         .version = DEVICE_ADD_ARGS_VERSION,
         .name = "bcm-vc-rpc",
         .driver = driver,
-        .ops = &mailbox_device_proto,
-        .proto_id = MX_PROTOCOL_BCM_BUS,
-        .proto_ops = &bcm_bus_protocol,
+        .ops = &mailbox_device_protocol,
         .props = mailbox_props,
         .prop_count = countof(mailbox_props),
     };
@@ -381,7 +377,7 @@ static mx_driver_ops_t bcm_mailbox_driver_ops = {
 MAGENTA_DRIVER_BEGIN(bcm_mailbox, bcm_mailbox_driver_ops, "magenta", "0.1", 4)
     BI_ABORT_IF(NE, BIND_PROTOCOL, MX_PROTOCOL_SOC),
     BI_ABORT_IF(NE, BIND_SOC_VID, SOC_VID_BROADCOMM),
-    BI_MATCH_IF(EQ, BIND_SOC_PID, SOC_PID_BROADCOMM_RPI3),
+    BI_ABORT_IF(NE, BIND_SOC_PID, SOC_PID_BROADCOMM_RPI3),
     BI_MATCH_IF(EQ, BIND_SOC_DID, SOC_DID_BROADCOMM_MAILBOX),
 MAGENTA_DRIVER_END(bcm_mailbox)
 
