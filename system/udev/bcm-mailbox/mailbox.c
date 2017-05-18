@@ -274,26 +274,10 @@ static mx_status_t mailbox_device_ioctl(void* ctx, uint32_t op,
     }
 }
 
-static bcm_bus_protocol_t bcm_bus_protocol;
-static mx_protocol_device_t mailbox_device_protocol;
-
-mx_status_t bus_device_get_protocol(void* ctx, uint32_t proto_id, void** protocol) {
-printf("mailbox get protocol %x\n", proto_id);
-    if (proto_id == MX_PROTOCOL_BCM_BUS) {
-        *protocol = &bcm_bus_protocol;
-        return NO_ERROR;
-    }
-    if (proto_id == MX_PROTOCOL_DEVICE) {
-        *protocol = &mailbox_device_protocol;
-        return NO_ERROR;
-    }
-    return ERR_NOT_SUPPORTED;
-}
 
 static mx_protocol_device_t mailbox_device_protocol = {
     .version = DEVICE_OPS_VERSION,
     .ioctl = mailbox_device_ioctl,
-    .get_protocol = bus_device_get_protocol,
 };
 
 static mx_status_t bcm_bus_get_macid(mx_device_t* device, uint8_t* out_mac) {
@@ -353,6 +337,8 @@ static mx_status_t mailbox_bind(mx_driver_t* driver, mx_device_t* parent, void**
         .ops = &mailbox_device_protocol,
         .props = mailbox_props,
         .prop_count = countof(mailbox_props),
+        .proto_id = MX_PROTOCOL_BCM_BUS,
+        .proto_ops = &bcm_bus_protocol,
     };
 
     status = device_add(parent, &vc_rpc_args, &rpc_mxdev);
